@@ -6,17 +6,19 @@ User = get_user_model()
 
 class Ingredient(models.Model):
     name = models.CharField(max_length=200, verbose_name='Наименование')
-    # quantity = models.IntegerField(verbose_name='Количество')
     measurement_unit = models.CharField(max_length=200, verbose_name='Единицы измерения')
 
-    # def __str__(self):
-    #     return self.name
+    def __str__(self):
+        return f'{self.name}, {self.measurement_unit}'
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=200, verbose_name='тэг')
-    color = models.CharField(max_length=200, verbose_name='Цвет тэга')
-    slug = models.SlugField(unique=True, verbose_name='Ссылка')
+    name = models.CharField(max_length=200, verbose_name='Название')
+    color = models.CharField(max_length=7, verbose_name='Цвет в HEX')
+    slug = models.SlugField(max_length=200, unique=True, verbose_name='Уникальный слаг')
+
+    def __str__(self):
+        return self.name
 
 
 class Recipe(models.Model):
@@ -44,32 +46,40 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         Ingredient,
-        # through="IngredientInRecipe",
+        through='RecipeIngredient',
+        through_fields=('recipe', 'ingredient'),
         # related_name="recipes",
         blank=True,
         verbose_name='Ингредиенты',
         help_text='Введите необходимые ингредиенты'
     )
-    tag = models.ManyToManyField(
+    # amount = models.PositiveIntegerField(
+    #     verbose_name='Количество'
+    # )
+    tags = models.ManyToManyField(
         Tag,
         # through="TagsInRecipe",
         # related_name="recipes",
         verbose_name='Тэг',
         help_text='Введите необходимые тэги'
     )
-    time = models.IntegerField(
+    cooking_time = models.PositiveIntegerField(
         verbose_name='Время приготовления в минутах'
     )
     pub_date = models.DateTimeField(
         auto_now_add=True, verbose_name='Дата'
     )
-    quantity = models.IntegerField(
-        verbose_name='Количество'
-    )
-    like = models.ManyToManyField(
+    is_favorited = models.ManyToManyField(
         User,
         through="Favorites",
         through_fields=('recipe', 'author'),
+        blank=True,
+        related_name='rname_liked_recipes'
+    )
+    is_in_shopping_cart = models.ManyToManyField(
+        'ShoppingCart',
+        # through="Shopping_cart",
+        # through_fields=('recipe', 'author'),
         blank=True,
         related_name='rname_liked_recipes'
     )
@@ -78,8 +88,8 @@ class Recipe(models.Model):
         ordering = ['-pub_date']
         # default_related_name = 'posts_rname'
 
-    # def __str__(self):
-    #     return self.name
+    def __str__(self):
+        return self.name
 
 
 # class TagsInRecipe(models.Model):
@@ -93,18 +103,18 @@ class Recipe(models.Model):
 #     )
 
 
-# class IngredientInRecipe(models.Model):
-#     ingredient = models.ForeignKey(
-#         Ingredient,
-#         on_delete=models.CASCADE
-#     )
-#     recipe = models.ForeignKey(
-#         Recipe,
-#         on_delete=models.CASCADE
-#     )
-#     quantity = models.IntegerField(
-#         verbose_name='Количество'
-#     )
+class RecipeIngredient(models.Model):
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE
+    )
+    amount = models.PositiveIntegerField(
+        verbose_name='Количество'
+    )
 
 
 class Favorites(models.Model):
@@ -125,12 +135,13 @@ class Favorites(models.Model):
             models.UniqueConstraint(fields=['recipe', 'author'],
                                     name='unique_like')
         ]
+        # unique_together = ("author", "recipe")
 
     # def __str__(self):
     #     return self.recipe
 
 
-class ShoppingList(models.Model):
+class ShoppingCart(models.Model):
     recipe = models.ForeignKey(
         'Recipe',
         # related_name="shopping_cart",
@@ -142,9 +153,9 @@ class ShoppingList(models.Model):
         # related_name="shopping_cart",
         verbose_name='Автор'
     )
-    quantity = models.IntegerField(
-        verbose_name='Количество'
-    )
+    # amount = models.IntegerField(
+    #     verbose_name='Количество'
+    # )
 
 
     # def __str__(self):
@@ -156,7 +167,7 @@ class Follow(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Автор',
         related_name='following')
-    follower = models.ForeignKey(
+    user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         verbose_name='Подписчик',
@@ -164,6 +175,6 @@ class Follow(models.Model):
 
     class Meta:
         constraints = [models.UniqueConstraint(
-            fields=['following', 'follower'],
+            fields=['following', 'user'],
             name='unique subs')
         ]

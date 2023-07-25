@@ -1,5 +1,5 @@
 # Импортируем из приложения django.contrib.auth нужный view-класс
-from django.contrib.auth.views import LogoutView 
+# from django.contrib.auth.views import LogoutView 
 from django.urls import path
 
 app_name = 'users'

@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig',
     'import_export',
     'rest_framework',
+    # 'rest_framework.authtoken',
+
 ]
 
 MIDDLEWARE = [
@@ -130,8 +132,22 @@ STATIC_ROOT = BASE_DIR / 'static'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ]
-}
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': [],
+#     'DEFAULT_PERMISSION_CLASSES': [],
+#     # 'DEFAULT_PERMISSION_CLASSES': [
+#     #     'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+#     # ]
+# }
+
+# REST_FRAMEWORK = {
+#     'DEFAULT_PERMISSION_CLASSES': [
+#         'rest_framework.permissions.IsAuthenticated', 
+#     ],
+
+
+#     'DEFAULT_AUTHENTICATION_CLASSES': [
+#         'rest_framework.authentication.TokenAuthentication',
+#     ]
+# }
+AUTH_USER_MODEL = 'users.User'
