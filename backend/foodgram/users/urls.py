@@ -1,10 +1,19 @@
 # Импортируем из приложения django.contrib.auth нужный view-класс
 # from django.contrib.auth.views import LogoutView 
 from django.urls import path
+from django.conf.urls import include
+from rest_framework.routers import DefaultRouter
 
-app_name = 'users'
+from .views import CustomUserViewSet
+
+
+router = DefaultRouter()
+router.register("users", CustomUserViewSet)
+# app_name = 'users'
 
 urlpatterns = [
+    path("auth/", include("djoser.urls.authtoken")),
+    path("", include(router.urls)),
     # path(
     #   'logout/',
     #   # Прямо в описании обработчика укажем шаблон, 

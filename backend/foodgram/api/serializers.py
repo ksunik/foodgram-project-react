@@ -32,6 +32,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(read_only=True, many=True)
     ingredients = RcipeIngredientSerializer(read_only=True, many=True, source='recipeingredient_set')
     author = CustomUserSerializer(read_only=True)
+    is_favorited = serializers.SerializerMethodField()
 
     class Meta:
         fields = ['id',
@@ -47,6 +48,13 @@ class RecipeSerializer(serializers.ModelSerializer):
                   ]
         model = Recipe
 
+    def get_is_favorited(self, obj):
+        request = self.context.get('request')
+        return (request and request.user.is_authenticated
+                and Favorites.objects.filter(
+                    user=request.user, recipe=obj
+                ).exists())
+
 
 class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
@@ -60,6 +68,7 @@ class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
+    ingredient = RecipeIngredientCreateSerializer(many=True)
     class Meta:
         fields = ['tags',
                   'ingredients',
@@ -72,16 +81,24 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                   ]
         model = Recipe
 
-    # def create(self, validated_data):
-    #     ingredients = validated_data.pop('ingredients')
-    #     instance = super().create(validated_data)
+    def create(self, validated_data):
+        ingredients = validated_data.pop('ingredients')
+        instance = super().create(validated_data)
 
-    #     for ingredient_data in ingredients:
-    #         RecipeIngredient(
-    #             recipe=instance,
-    #             ingredient=ingredient_data['ingredient'],
-    #             amount=ingredient_data['amount']
-    #         ).save()
+        for ingredient_data in ingredients:
+            RecipeIngredient(
+                recipe=instance,
+                ingredient=ingredient_data['ingredient'],
+                amount=ingredient_data['amount']
+            ).save()
+        return instance
+    
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        return RecipeSerializer(
+            instance,
+            context={'request': request}
+        ).data
 
 
 class ShoppingListSerializer(serializers.ModelSerializer):
@@ -97,9 +114,17 @@ class FavoritesSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all()
     )
+
     class Meta:
         fields = ['recipe', 'author']
         model = Favorites
+
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        return RecipeSerializer(
+            instance.recipe,
+            context={'request': request}
+        ).data
 
 
 class FollowSerializer(serializers.ModelSerializer):

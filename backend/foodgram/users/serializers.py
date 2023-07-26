@@ -3,8 +3,8 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework.authtoken.models import Token
 
-from . import models
-from recipes.models import Recipe
+# from recipes.models import models
+from recipes.models import Recipe, Follow
 # from api.serializers import FollowSerializer
 
 
@@ -45,3 +45,17 @@ class TokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = Token
         fields = ('token',)
+
+
+class ShowUserSerializer(CustomUserSerializer):
+    is_subscribed = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ('email', 'id', 'username', 'first_name', 'last_name', 'is_subscribed')
+
+    def get_is_subscribed(self, obj):
+        if (self.context.get('request')
+            and not self.context['request'].user.is_anonymous):
+            return Follow.objects.filter(following=self.context['request'].user, user=obj).exists()
+        return False
