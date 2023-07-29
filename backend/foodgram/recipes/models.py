@@ -9,7 +9,7 @@ class Ingredient(models.Model):
     measurement_unit = models.CharField(max_length=200, verbose_name='Единицы измерения')
 
     def __str__(self):
-        return f'{self.name}, {self.measurement_unit}'
+        return f'ИНГРЕДИЕНТ {self.name}, {self.measurement_unit}'
 
 
 class Tag(models.Model):
@@ -18,7 +18,7 @@ class Tag(models.Model):
     slug = models.SlugField(max_length=200, unique=True, verbose_name='Уникальный слаг')
 
     def __str__(self):
-        return self.name
+        return f'ТЭГ {self.name}'
 
 
 class Recipe(models.Model):
@@ -26,7 +26,8 @@ class Recipe(models.Model):
         User,
         on_delete=models.CASCADE,
         verbose_name='Автор',
-        help_text='Укажите автора'
+        help_text='Укажите автора',
+        related_name='recipe_author'
     )
     name = models.CharField(
         max_length=200,
@@ -89,7 +90,7 @@ class Recipe(models.Model):
         # default_related_name = 'posts_rname'
 
     def __str__(self):
-        return self.name
+        return f'РЕЦЕПТ {self.name}'
 
 
 # class TagsInRecipe(models.Model):
@@ -116,6 +117,12 @@ class RecipeIngredient(models.Model):
         verbose_name='Количество'
     )
 
+    class Meta:
+        default_related_name = 'recipeingredients'
+
+    def __str__(self):
+        return f'РЕЦЕПТ ИНГРЕДИЕНТ{self.ingredient}, {self.recipe}, {self.amount}'
+
 
 class Favorites(models.Model):
     recipe = models.ForeignKey(
@@ -137,8 +144,8 @@ class Favorites(models.Model):
         ]
         # unique_together = ("author", "recipe")
 
-    # def __str__(self):
-    #     return self.recipe
+    def __str__(self):
+        return f'ИЗБРАННОЕ {self.recipe}'
 
 
 class ShoppingCart(models.Model):
@@ -157,9 +164,12 @@ class ShoppingCart(models.Model):
     #     verbose_name='Количество'
     # )
 
+    class Meta:
+        default_related_name = 'shopping_cart'
 
-    # def __str__(self):
-    #     return self.recipe
+
+    def __str__(self):
+        return f'СПИСОК ПОКУПОКself.recipe'
 
 class Follow(models.Model):
     following = models.ForeignKey(
@@ -178,3 +188,6 @@ class Follow(models.Model):
             fields=['following', 'user'],
             name='unique subs')
         ]
+
+    def __str__(self):
+        return f'ПОДПИСКИ {self.user} пописан на {self.following}'
