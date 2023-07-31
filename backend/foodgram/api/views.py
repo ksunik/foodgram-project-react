@@ -268,12 +268,6 @@ class FollowViewSet(mixins.ListModelMixin,
     # filter_backends = (filters.SearchFilter,)
     # search_fields = ('following__username',)
 
-    # def get_queryset(self):
-    #     user = self.request.user
-    #     print('!!!!!!!!!!!!!!!!!!!!!!')
-    #     print(user.follower)
-    #     print(User.objects.filter(following__user=self.request.user))
-    #     return user.follower
 
     def get_queryset(self):
         return User.objects.filter(following__user=self.request.user)

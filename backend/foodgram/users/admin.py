@@ -10,9 +10,9 @@ from recipes.models import User, Follow
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = ('pk', 'email', 'username', 'first_name', 'last_name')
-    search_fields = ('username', 'email', 'first_name', 'last_name')
+    # search_fields = ('username', 'email', 'first_name', 'last_name')
     list_filter = ('username', 'email')
-    empty_value_display = settings.EMPTY_VALUE
+    # empty_value_display = settings.EMPTY_VALUE
 
 
 @admin.register(Follow)

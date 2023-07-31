@@ -200,5 +200,5 @@ AUTH_USER_MODEL = 'users.User'
 
 EMPTY_VALUE = '-пусто-'
 
-# CSRF_FAILURE_VIEW = 'core.views.csrf_failure'
+# CSRF_FAILURE_VIEW = 'core.views.csrf_failure' 
 CSRF_COOKIE_SECURE = False
